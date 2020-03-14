@@ -30,17 +30,14 @@
 	    implementation 'com.github.M7mdZain:InternetConnectivityLibrary:1.2'
      
      
-### *Example*
+### *Usage Example*
   
-	  import com.zain.android.internetconnectivitylibrary.ConnectionUtil;
-	  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_CELLULAR;
-	  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_WIFI;
   
-###     // 1. Get the current status the current connectivity (online / offline).
+###     1. Get the current status the current connectivity (online / offline).
 	    Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toast.LENGTH_SHORT).show();
 
 
-###     // 2. Continuous check/listen to internet connection and show a Toast message when the device goes offline or online
+###     2. Continuous check/listen to internet connection and show a Toast message when the device goes offline or online
 	    connectionUtil.onInternetStateListener(new ConnectionUtil.ConnectionStateListener() {
 		@Override
 		public void onAvailable(boolean isAvailable) {
@@ -49,7 +46,7 @@
 	    });
 
 
-###     // 3. Get the type of the device active internet connection.
+###     3. Get the type of the device active internet connection.
 	switch (connectionUtil.getActiveNetwork()) {
 	case TRANSPORT_WIFI:
 	    Toast.makeText(MainActivity.this, "WiFi", Toast.LENGTH_SHORT).show();
@@ -62,4 +59,10 @@
 	default:
 	    Toast.makeText(MainActivity.this, "Offline", Toast.LENGTH_SHORT).show();
 	}
+
+### Make sure to do proper imports
+
+	  import com.zain.android.internetconnectivitylibrary.ConnectionUtil;
+	  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_CELLULAR;
+	  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_WIFI;
 
