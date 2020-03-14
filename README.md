@@ -1,4 +1,4 @@
-*This is Android Library that allows to:*
+# *This is Android Library that allows to:*
 
 
 1. Get the current status the current connectivity (online / offline).
