@@ -10,7 +10,7 @@
 
 ## *API Support*
 
-	It supports minimum of API level 15, and tested till API level 28 (Android 9 / Pie).
+It supports minimum of API level 15, and tested till API level 28 (Android 9 / Pie).
   
   
 ## *How to Use:*
@@ -34,11 +34,16 @@
   
   
 ###     1. Get the current status the current connectivity (online / offline).
-```	    Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toast.LENGTH_SHORT).show(); ```
+
+```
+Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toast.LENGTH_SHORT).show();
+ ```	    
 
 
 ###     2. Continuous check/listen to internet connection and show a Toast message when the device goes offline or online
-```	    connectionUtil.onInternetStateListener(new ConnectionUtil.ConnectionStateListener() {
+
+```
+	    connectionUtil.onInternetStateListener(new ConnectionUtil.ConnectionStateListener() {
 		@Override
 		public void onAvailable(boolean isAvailable) {
 		    Toast.makeText(MainActivity.this, "Online? " + isAvailable, Toast.LENGTH_SHORT).show();
@@ -47,7 +52,9 @@
 ```
 
 ###     3. Get the type of the device active internet connection.
-```	switch (connectionUtil.getActiveNetwork()) {
+
+```
+	switch (connectionUtil.getActiveNetwork()) {
 	case TRANSPORT_WIFI:
 	    Toast.makeText(MainActivity.this, "WiFi", Toast.LENGTH_SHORT).show();
 	    break;
@@ -63,7 +70,7 @@
 
 ### Make sure to do proper imports
 ```
-	  import com.zain.android.internetconnectivitylibrary.ConnectionUtil;
-	  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_CELLULAR;
-	  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_WIFI;
+  import com.zain.android.internetconnectivitylibrary.ConnectionUtil;
+  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_CELLULAR;
+  import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_WIFI;
 ```
