@@ -1,7 +1,9 @@
 *This is Android Library that allows to:*
 
 	1. Get the current status the current connectivity (online / offline).
+	
         2. Continuous check/listen to internet connection and trigger a callback when the device goes offline or online.
+	
 	3. Get the type of the device active internet connection (WiFi or Cellular).
 
 
