@@ -9,7 +9,8 @@
 
 
 *API Support*
-It supports minimum of API level 15, and tested till API level 28 (Android 9 / Pie).
+
+	It supports minimum of API level 15, and tested till API level 28 (Android 9 / Pie).
   
   
 *How to Use:*
