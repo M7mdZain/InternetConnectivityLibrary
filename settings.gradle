@@ -1,0 +1,3 @@
+rootProject.name='InternetConnectivityLibrary'
+include ':app'
+include ':internetconnectivitylibrary'
