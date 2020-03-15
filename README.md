@@ -56,18 +56,18 @@ Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toa
 ###     3. Get the type of the device active internet connection.
 
 ```
-	switch (connectionUtil.getActiveNetwork()) {
-		case TRANSPORT_WIFI:
-		    Toast.makeText(MainActivity.this, "WiFi", Toast.LENGTH_SHORT).show();
-		    break;
+switch (connectionUtil.getActiveNetwork()) {
+	case TRANSPORT_WIFI:
+	    Toast.makeText(MainActivity.this, "WiFi", Toast.LENGTH_SHORT).show();
+	    break;
 
-		case TRANSPORT_CELLULAR:
-		    Toast.makeText(MainActivity.this, "Cellular", Toast.LENGTH_SHORT).show();
-		    break;
+	case TRANSPORT_CELLULAR:
+	    Toast.makeText(MainActivity.this, "Cellular", Toast.LENGTH_SHORT).show();
+	    break;
 
-		default:
-		    Toast.makeText(MainActivity.this, "Offline", Toast.LENGTH_SHORT).show();
-	}
+	default:
+	    Toast.makeText(MainActivity.this, "Offline", Toast.LENGTH_SHORT).show();
+}
 ```
 
 ### Make sure to do proper imports
