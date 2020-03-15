@@ -32,7 +32,7 @@ It supports minimum of API level 15, and tested till API level 28 (Android 9 / P
 implementation 'com.github.M7mdZain:InternetConnectivityLibrary:1.2'
 ```     
      
-### *Usage Example*
+## *Usage Example*
   
   
 ###     1. Get the current status the current connectivity (online / offline).
