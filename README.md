@@ -78,3 +78,5 @@ Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toa
 ```
 
 <img src="https://i.imgur.com/a169U5R.gif"/>
+
+[img]https://i.imgur.com/a169U5R.gif[/img]
