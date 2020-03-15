@@ -77,4 +77,4 @@ Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toa
   import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_WIFI;
 ```
 
-<img src="https://media.giphy.com/media/RkKUxUyLt6LM6jSyoI/giphy.gif"/>
+<img src="https://imgur.com/a169U5R.gif"/>
