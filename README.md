@@ -79,4 +79,6 @@ Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toa
 
 <img src="https://i.imgur.com/a169U5R.gif"/>
 
-[img]https://i.imgur.com/a169U5R.gif[/img]
+<blockquote class="imgur-embed-pub" lang="en" data-id="a169U5R"><a href="https://imgur.com/a169U5R">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
+
+
