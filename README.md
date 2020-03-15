@@ -39,7 +39,7 @@ implementation 'com.github.M7mdZain:InternetConnectivityLibrary:1.2'
 
 ```
 Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toast.LENGTH_SHORT).show();
- ```	    
+```	    
 
 
 ###     2. Continuous check/listen to internet connection and show a Toast message when the device goes offline or online
@@ -71,11 +71,15 @@ Toast.makeText(MainActivity.this, "Is online: " + connectionUtil.isOnline(), Toa
 ```
 
 ### Make sure to do proper imports
+
 ```
   import com.zain.android.internetconnectivitylibrary.ConnectionUtil;
   import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_CELLULAR;
   import static com.zain.android.internetconnectivitylibrary.ConnectionUtil.TRANSPORT_WIFI;
 ```
+
+
+## Preview
 
 <img src="https://media.giphy.com/media/ZccNsmppT6se8mXSYK/giphy.gif"/>
 
