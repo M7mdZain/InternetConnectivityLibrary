@@ -1,12 +1,11 @@
 ## *This is Android Library that allows to:*
 
 
-* Get the current status the current connectivity (online / offline).
-	
-* Continuous check/listen to internet connection and trigger a callback when the device goes offline or online.
-	
-* Get the type of the device active internet connection (WiFi or Cellular).
-
+* Get the current connectivity status (online / offline).
+* Continuous checking/listening to the internet connection and triggering a callback when the device goes offline or online.	
+* Get the type of the active internet connection (WiFi or Cellular).
+* Get the type of all available networks (WiFi or Cellular). >> Only supported on API 21+
+* Get the number of all available networks >> Only supported on API 21+
 
 ## *API Support*
 
@@ -34,6 +33,10 @@ implementation 'com.github.M7mdZain:InternetConnectivityLibrary:1.2'
      
 ## *Usage Example*
   
+###    First instantiate the ConnectionUtil
+```
+ConnectionUtil connectionUtil = new ConnectionUtil(context);
+```
   
 ###     1. Get the current status the current connectivity (online / offline).
 
@@ -69,6 +72,32 @@ switch (connectionUtil.getActiveNetwork()) {
 	    Toast.makeText(MainActivity.this, "Offline", Toast.LENGTH_SHORT).show();
 }
 ```
+
+###     4. Get all available networks >> Only supported on API 21+
+
+```
+List<Integer> connectedNetworks = connectionUtil.getAvailableNetworks();
+
+StringBuilder activeNetworks = new StringBuilder();
+for (Integer network : connectedNetworks) {
+	switch (network) {
+		case TRANSPORT_WIFI:
+			activeNetworks.append(" WiFi");
+			break;
+
+		case TRANSPORT_CELLULAR:
+			activeNetworks.append(" Cellular");
+			break;
+	}
+}
+```
+
+###     5. Get the number of all available networks >> Only supported on API 21+
+
+```
+connectionUtil.getAvailableNetworksCount()
+```
+
 
 ### Make sure to do proper imports
 
