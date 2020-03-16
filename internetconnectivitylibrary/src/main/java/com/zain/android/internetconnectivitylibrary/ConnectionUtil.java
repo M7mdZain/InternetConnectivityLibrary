@@ -10,8 +10,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -21,6 +19,9 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiresApi(api = Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
 public class ConnectionUtil implements LifecycleObserver {
 
@@ -28,8 +29,12 @@ public class ConnectionUtil implements LifecycleObserver {
     private ConnectivityManager mConnectivityMgr;
     private Context mContext;
     private NetworkStateReceiver mNetworkStateReceiver;
+    /*
+     * boolean indicates if my device is connected to the internet or not
+     * */
     private boolean mIsConnected = false;
-    private ConnectionStateMonitorAPI21 mConnectionStateMonitorAPI21;
+    private ConnectionMonitor mConnectionMonitor;
+
     /**
      * Indicates there is no available network.
      */
@@ -45,7 +50,6 @@ public class ConnectionUtil implements LifecycleObserver {
      */
     public static final int TRANSPORT_WIFI = 1;
 
-
     public interface ConnectionStateListener {
         void onAvailable(boolean isAvailable);
     }
@@ -56,14 +60,13 @@ public class ConnectionUtil implements LifecycleObserver {
         ((AppCompatActivity) mContext).getLifecycle().addObserver(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mConnectionStateMonitorAPI21 = new ConnectionStateMonitorAPI21();
+            mConnectionMonitor = new ConnectionMonitor();
             NetworkRequest networkRequest = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     .build();
-            mConnectivityMgr.registerNetworkCallback(networkRequest, mConnectionStateMonitorAPI21);
+            mConnectivityMgr.registerNetworkCallback(networkRequest, mConnectionMonitor);
         }
-
 
     }
 
@@ -71,10 +74,10 @@ public class ConnectionUtil implements LifecycleObserver {
      * Returns true if connected to the internet, and false otherwise
      *
      * <p>
-     * NetworkInfo is deprecated as of API 29
+     * NetworkInfo is deprecated in API 29
      * https://developer.android.com/reference/android/net/NetworkInfo
      * <p>
-     * getActiveNetworkInfo() is  deprecated as of API 29
+     * getActiveNetworkInfo() is deprecated in API 29
      * https://developer.android.com/reference/android/net/ConnectivityManager#getActiveNetworkInfo()
      * <p>
      * getNetworkInfo(int) is deprecated as of API 23
@@ -84,42 +87,32 @@ public class ConnectionUtil implements LifecycleObserver {
 
         mIsConnected = false;
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             // Checking internet connectivity
             NetworkInfo activeNetwork = null;
             if (mConnectivityMgr != null) {
-                activeNetwork = mConnectivityMgr.getActiveNetworkInfo();
+                activeNetwork = mConnectivityMgr.getActiveNetworkInfo(); // Deprecated in API 29
             }
             mIsConnected = activeNetwork != null;
 
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network[] allNetworks = mConnectivityMgr.getAllNetworks(); // added in API 21 (Lollipop)
 
-                Network activeNetwork = mConnectivityMgr.getActiveNetwork();
-                NetworkCapabilities networkCapabilities = mConnectivityMgr.getNetworkCapabilities(activeNetwork);
-                if (networkCapabilities == null) return false;
-                mIsConnected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-
-            } else {
-                Network[] allNetworks = mConnectivityMgr.getAllNetworks();
-
-                for (Network network : allNetworks) {
-                    NetworkCapabilities networkCapabilities = mConnectivityMgr.getNetworkCapabilities(network);
-                    if (networkCapabilities != null) {
-                        if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                                || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                                || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
-                            mIsConnected = true;
-//                    boolean b = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-//                return b;
-                    }
+            for (Network network : allNetworks) {
+                NetworkCapabilities networkCapabilities = mConnectivityMgr.getNetworkCapabilities(network);
+                if (networkCapabilities != null) {
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))
+                        mIsConnected = true;
                 }
             }
-
         }
+
         return mIsConnected;
 
     }
+
 
     /**
      * Returns
@@ -131,7 +124,7 @@ public class ConnectionUtil implements LifecycleObserver {
      */
     public int getActiveNetwork() {
 
-        NetworkInfo activeNetwork = mConnectivityMgr.getActiveNetworkInfo();
+        NetworkInfo activeNetwork = mConnectivityMgr.getActiveNetworkInfo(); // Deprecated in API 29
         if (activeNetwork != null)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -147,17 +140,87 @@ public class ConnectionUtil implements LifecycleObserver {
                     }
 
             } else {
-                if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) { // Deprecated in API 28
                     // connected to mobile data
                     return TRANSPORT_CELLULAR;
 
-                } else if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+                } else if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) { // Deprecated in API 28
                     // connected to wifi
                     return TRANSPORT_WIFI;
                 }
             }
         return NO_NETWORK_AVAILABLE;
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public int getAvailableNetworksCount() {
+
+        int count = 0;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Network[] allNetworks = mConnectivityMgr.getAllNetworks(); // added in API 21 (Lollipop)
+            for (Network network : allNetworks) {
+                NetworkCapabilities networkCapabilities = mConnectivityMgr.getNetworkCapabilities(network);
+                if (networkCapabilities != null)
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+                        count++;
+            }
+
+        }
+
+//        // Has bugs below API 21
+//        else {
+//            NetworkInfo[] infos = mConnectivityMgr.getAllNetworkInfo(); // Deprecated in API 23
+//            for (NetworkInfo networkInfo : infos) {
+//                if (networkInfo.getState() == NetworkInfo.State.CONNECTED &&
+//                        (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) || (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
+//                    count++;
+//                }
+//
+//            }
+//
+//        }
+        return count;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public List<Integer> getAvailableNetworks() {
+
+        List<Integer> activeNetworks = new ArrayList<>();
+
+        Network[] allNetworks; // added in API 21 (Lollipop)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            allNetworks = mConnectivityMgr.getAllNetworks();
+            for (Network network : allNetworks) {
+                NetworkCapabilities networkCapabilities = mConnectivityMgr.getNetworkCapabilities(network);
+                if (networkCapabilities != null) {
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
+                        activeNetworks.add(TRANSPORT_WIFI);
+
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+                        activeNetworks.add(TRANSPORT_CELLULAR);
+
+                }
+            }
+        }
+
+//        // Has bugs below API 21
+//        else {
+//            NetworkInfo[] info = mConnectivityMgr.getAllNetworkInfo(); // Deprecated in API 23
+//            for (NetworkInfo networkInfo : info) {
+//                if (networkInfo.getState() == NetworkInfo.State.CONNECTED && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+//                    activeNetworks.add(TRANSPORT_WIFI);
+//                }
+//                if (networkInfo.getState() == NetworkInfo.State.CONNECTED && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+//                    activeNetworks.add(TRANSPORT_CELLULAR);
+//                }
+//            }
+//
+//        }
+        return activeNetworks;
+    }
+
 
     public void onInternetStateListener(ConnectionStateListener listener) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -166,7 +229,7 @@ public class ConnectionUtil implements LifecycleObserver {
             mContext.registerReceiver(mNetworkStateReceiver, intentFilter);
 
         } else {
-            mConnectionStateMonitorAPI21.setOnConnectionStateListener(listener);
+            mConnectionMonitor.setOnConnectionStateListener(listener);
         }
     }
 
@@ -177,8 +240,8 @@ public class ConnectionUtil implements LifecycleObserver {
         ((AppCompatActivity) mContext).getLifecycle().removeObserver(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (mConnectionStateMonitorAPI21 != null)
-                mConnectivityMgr.unregisterNetworkCallback(mConnectionStateMonitorAPI21);
+            if (mConnectionMonitor != null)
+                mConnectivityMgr.unregisterNetworkCallback(mConnectionMonitor);
         } else {
             if (mNetworkStateReceiver != null)
                 mContext.unregisterReceiver(mNetworkStateReceiver);
@@ -199,37 +262,23 @@ public class ConnectionUtil implements LifecycleObserver {
         public void onReceive(Context context, Intent intent) {
             if (intent.getExtras() != null) {
 
-                final Handler handler = new Handler(Looper.getMainLooper());
+                NetworkInfo activeNetworkInfo = mConnectivityMgr.getActiveNetworkInfo(); // deprecated in API 29
 
-                NetworkInfo activeNetworkInfo = mConnectivityMgr.getActiveNetworkInfo();
-                if (activeNetworkInfo != null && activeNetworkInfo.getState() == NetworkInfo.State.CONNECTED) {
+                /*
+                 * activeNetworkInfo.getState() deprecated in API 28
+                 * NetworkInfo.State.CONNECTED deprecated in API 29
+                 * */
+                if (!mIsConnected && activeNetworkInfo != null && activeNetworkInfo.getState() == NetworkInfo.State.CONNECTED) {
                     Log.d(TAG, "onReceive: " + "Connected To: " + activeNetworkInfo.getTypeName());
+                    mIsConnected = true;
                     mListener.onAvailable(true);
 
                 } else if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
-                    /*
-                     * Adding a delay to handle the case that both WiFi & cellular are connected, and when
-                     * the WiFi gets disconnected, then we need to wait some delay before reporting that we are
-                     * disconnected; so during this delay it can take time to transfer the active network from
-                     * the disconnected WiFi to the Cellualr network, and then the listener callback doesn't
-                     * return the wrong status
-                     */
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            handler.removeCallbacks(this);
-                            if (isOnline()) {
-                                if (!mIsConnected)
-                                    mListener.onAvailable(true);
-                                mIsConnected = true;
+                    if (!isOnline()) {
+                        mListener.onAvailable(false);
+                        mIsConnected = false;
+                    }
 
-                            } else {
-                                mListener.onAvailable(false);
-                                mIsConnected = false;
-                            }
-                        }
-
-                    }, 2000); // 2 sec of delay
                 }
 
             }
@@ -237,38 +286,8 @@ public class ConnectionUtil implements LifecycleObserver {
     }
 
 
-    /**
-     * Receiver without a handler delay
-     */
-//    public class NetworkStateReceiver extends BroadcastReceiver {
-//
-//        ConnectionStateListener mListener;
-//
-//        public NetworkStateReceiver(ConnectionStateListener listener) {
-//            mListener = listener;
-//        }
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (intent.getExtras() != null) {
-//
-//                NetworkInfo activeNetworkInfo = mConnectivityMgr.getActiveNetworkInfo();
-//
-//                if (activeNetworkInfo != null && activeNetworkInfo.getState() == NetworkInfo.State.CONNECTED) {
-//                    Log.d(TAG, "onReceive: " + "Connected To: " + activeNetworkInfo.getTypeName());
-//                    mListener.onAvailable(true);
-//
-//                } else if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, Boolean.FALSE)) {
-//                    Log.d(TAG, "onReceive: " + "Disconnected ");
-//                    mListener.onAvailable(false);
-//                }
-//            }
-//        }
-//    }
-
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public class ConnectionStateMonitorAPI21 extends ConnectivityManager.NetworkCallback {
+    public class ConnectionMonitor extends ConnectivityManager.NetworkCallback {
 
         private ConnectionStateListener mConnectionStateListener;
 
@@ -291,35 +310,13 @@ public class ConnectionUtil implements LifecycleObserver {
 
         }
 
-
         @Override
         public void onLost(@NonNull Network network) {
 
-            final Handler handler = new Handler(Looper.getMainLooper());
-
-            /*
-             * Adding a delay to handle the case that both WiFi & cellular are connected, and when
-             * the WiFi gets disconnected, then we need to wait some delay before reporting that we are
-             * disconnected; so during this delay it can take time to transfer the active network from
-             * the disconnected WiFi to the Cellular network, and then the listener callback doesn't
-             * return the wrong status
-             */
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (isOnline()) {
-                        handler.removeCallbacks(this);
-                        return;
-                    }
-                    Log.d(TAG, "onLost: ");
-
-                    if (mConnectionStateListener != null) {
-                        mConnectionStateListener.onAvailable(false);
-                        mIsConnected = false;
-                    }
-                    handler.removeCallbacks(this);
-                }
-            }, 2000);
+            if (getAvailableNetworksCount() == 0) {
+                mConnectionStateListener.onAvailable(false);
+                mIsConnected = false;
+            }
 
         }
 
