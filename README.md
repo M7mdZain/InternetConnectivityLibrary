@@ -28,7 +28,7 @@ It supports minimum of API level 15, and tested till API level 28 (Android 9 / P
 ### Step 2: Add App level dependency
 
 ```
-implementation 'com.github.M7mdZain:InternetConnectivityLibrary:1.2'
+implementation 'com.github.M7mdZain:InternetConnectivityLibrary:v1.2'
 ```     
      
 ## *Usage Example*
